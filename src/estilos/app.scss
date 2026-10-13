@@ -1,0 +1,123 @@
+$cor-primaria: #0d3b66;
+$cor-secundaria: #3b82f6;
+$cor-secundaria-clara: #eff6ff;
+$cor-borda: #e2e8f0;
+$cor-titulo: #1e293b;
+$cor-neutra-500: #475569;
+$cor-neutra-300: #94a3b8;
+$cinza-claro: #f1f5f9;
+
+body {
+  background: #f5f7fa;
+  color: $cor-titulo;
+}
+
+.checkbox-manual {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: $cor-neutra-500;
+  cursor: pointer;
+  user-select: none;
+
+  input[type='checkbox'] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid $cor-borda;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: $cor-neutra-300;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    color: $cor-titulo;
+    background-color: $cinza-claro;
+    border-radius: 4px;
+  }
+}
+
+.mode-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.radio-card {
+  position: relative;
+  cursor: pointer;
+  border: 1px solid $cor-borda;
+  border-radius: 8px;
+  padding: 14px 16px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  input[type='radio'] {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  &.active {
+    border-color: $cor-secundaria;
+    background-color: $cor-secundaria-clara;
+  }
+
+  &-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: $cor-titulo;
+  }
+
+  &.active &-title {
+    color: $cor-primaria;
+  }
+
+  &-subtitle {
+    font-size: 12px;
+    color: $cor-neutra-300;
+  }
+}
+
+.form-group {
+  margin-bottom: 12px;
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  .invalid-feedback {
+    display: block;
+  }
+}

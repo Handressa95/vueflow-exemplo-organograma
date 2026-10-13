@@ -1,0 +1,374 @@
+@use 'sass:string';
+@use 'sass:map';
+
+// ============================================
+// CORES POR STATUS
+// ============================================
+$status-cores: (
+  'Atual': #007bff,
+  'Acrescimo': #28a745,
+  'Alteracao': #eab308,
+  'Extincao': #dc3545,
+  'Extincao/Liberacao': #dc3545,
+);
+
+$status-cores-claras: (
+  'Atual': #fafcff,
+  'Acrescimo': #f0fff1,
+  'Alteracao': #fefce8,
+  'Extincao': #ffeef3,
+  'Extincao/Liberacao': #fdeef3,
+);
+
+@function str-replace($texto, $busca, $substituto: '') {
+  $resultado: $texto;
+  $indice: string.index($resultado, $busca);
+
+  @while $indice {
+    $antes: string.slice($resultado, 1, $indice - 1);
+    $depois: string.slice($resultado, $indice + string.length($busca));
+    $resultado: $antes + $substituto + $depois;
+    $indice: string.index($resultado, $busca);
+  }
+
+  @return $resultado;
+}
+
+// ============================================
+// TOOLBAR
+// ============================================
+.org-chart {
+  &__toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 8px 0;
+
+    &-left,
+    &-right {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+  }
+}
+
+// ============================================
+// SELETOR DE COR DE FUNDO
+// ============================================
+.org-fundo-selector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  background: #fff;
+  border: 1px solid #dfe8f3;
+  border-radius: 6px;
+  padding: 4px 8px;
+  box-shadow: 0 0px 6px rgba(0, 0, 0, 0.08);
+  font-size: 0.7rem;
+  color: #334155;
+
+  &__input {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background: none;
+  }
+}
+
+// ============================================
+// FLOW WRAPPER
+// ============================================
+.flow-wrapper {
+  height: 600px;
+  width: 100%;
+  background: #fafbfc;
+  border: solid 1px #f3f3f3;
+  border-radius: 6px;
+
+  &.locked {
+    .org-node {
+      cursor: default;
+
+      &:active {
+        cursor: default;
+      }
+    }
+  }
+}
+
+// ============================================
+// NÓ DO ORGANOGRAMA
+// ============================================
+.org-node {
+  position: relative;
+  background: #fff;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 0;
+  // Preenche 100% do nó (.vue-flow__node) para que o redimensionamento
+  // feito pelo NodeResizer (que ajusta o nó, não este elemento) seja
+  // refletido na caixa.
+  width: 100%;
+  height: 100%;
+  min-width: 160px;
+  min-height: 90px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  cursor: grab;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+
+  @each $status, $cor in $status-cores {
+    &--status-#{str-replace($status, '/', '-')} {
+      border-left: 2px solid $cor;
+      background: map.get($status-cores-claras, $status);
+    }
+  }
+
+  &--dragging {
+    opacity: 0.6;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    transform: scale(0.95);
+  }
+
+  &--drop-target {
+    border: 2px dashed #2ecc71 !important;
+    box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2) !important;
+    transform: scale(1.02);
+  }
+
+  &--selected {
+    border-color: #fdcf5b;
+    box-shadow: 0 0 0 2px rgba(255, 183, 3, 0.16);
+  }
+
+  &--destacado {
+    border: 2px solid #f59e0b;
+    background: #fffbeb;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.25);
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  // Menu de ações (acima da caixa)
+  &__menu {
+    width: max-content;
+    display: flex;
+    align-items: center;
+    position: absolute;
+    justify-content: space-between;
+    top: -40px;
+    left: 0;
+    padding: 6px 8px;
+    border-bottom: 1px solid #eaf5ff;
+    background: #fff;
+    border-radius: 4px;
+    transition: opacity 0.2s ease;
+    opacity: 0;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.08);
+
+    .btn-link {
+      font-size: 0.7rem;
+      padding: 4px 4px;
+      color: #495057;
+      text-decoration: none;
+      font-weight: 500;
+
+      &:hover {
+        color: #007bff;
+        background: rgba(0, 123, 255, 0.05);
+        border-radius: 3px;
+      }
+
+      &.text-danger:hover {
+        color: #dc3545 !important;
+        background: rgba(220, 53, 69, 0.05);
+      }
+    }
+  }
+
+  &:hover &__menu,
+  &--selected &__menu {
+    opacity: 1;
+  }
+
+  &__content {
+    padding: 10px 14px 8px;
+    flex: 1;
+    position: relative;
+  }
+
+  &__nome {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #212529;
+    margin-top: 12px;
+    margin-bottom: 2px;
+    line-height: 1.3;
+    padding-right: 16px;
+  }
+
+  &__sigla {
+    font-size: 0.8rem;
+    color: #6c757d;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  &__status-badge {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    font-size: 0.6rem;
+    padding: 2px 10px;
+    border-radius: 0 6px 0 4px;
+    color: #fff;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    @each $status, $cor in $status-cores {
+      &--#{str-replace($status, '/', '-')} {
+        background: $cor;
+      }
+    }
+  }
+
+  &__footer {
+    padding: 6px 14px 8px;
+    border-top: 1px solid #e9ecef;
+    background: rgba(248, 249, 250, 0.4);
+    border-radius: 0 0 8px 8px;
+    text-align: center;
+  }
+
+  &__alocacoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    margin-bottom: 4px;
+  }
+
+  &__alocacao {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.78rem;
+    color: #495057;
+
+    &-simbolo {
+      font-weight: 600;
+      color: #2c4a75;
+    }
+
+    &-count {
+      font-weight: 600;
+      color: #212529;
+      margin-left: 1px;
+    }
+  }
+
+  &__detalhes {
+    font-size: 0.75rem;
+    padding: 2px 0;
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-block;
+
+    &:hover {
+      color: #0056b3;
+      text-decoration: underline;
+    }
+  }
+
+  // Botão de expandir/recolher (abaixo da caixa)
+  &__toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    bottom: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    gap: 4px;
+    background: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 0 10px;
+    height: 24px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #495057;
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    z-index: 2;
+
+    &:hover {
+      background: #f8f9fa;
+    }
+  }
+
+  &__toggle-icon {
+    font-size: 0.5rem;
+  }
+}
+
+// ============================================
+// RESPONSIVIDADE
+// ============================================
+@media (max-width: 768px) {
+  .org-node {
+    min-width: 140px;
+    min-height: 100px;
+
+    &__nome {
+      font-size: 0.8rem;
+      padding-right: 50px;
+    }
+
+    &__sigla {
+      font-size: 0.7rem;
+    }
+
+    &__alocacao {
+      font-size: 0.7rem;
+    }
+
+    &__menu .btn-link {
+      font-size: 0.6rem;
+      padding: 1px 4px;
+    }
+
+    &__status-badge {
+      font-size: 0.5rem;
+      padding: 1px 8px;
+      top: 8px;
+      right: 10px;
+    }
+  }
+
+  .org-chart__toolbar {
+    flex-direction: column;
+    gap: 8px;
+
+    &-left,
+    &-right {
+      width: 100%;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+  }
+}
